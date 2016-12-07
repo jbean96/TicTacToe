@@ -7,10 +7,15 @@ import xo_player_smart
 from methods import print_typing
 
 class XOGame:
-	def __init__(self):
+	def __init__(self, player):
+		self.player = player
+		if (self.player == "X"):
+			self.other = "O"
+		else:
+			self.other = "X"
 		self.board = xo_board.XOBoard()
 		self.eval = xo_board_evaluator.XOBoardEvaluator()
-		self.op_player = xo_player_smart.XOPlayerSmart()
+		self.op_player = xo_player_smart.XOPlayerSmart(self.other)
 		self.winner = None
 	
 	# Gets the next move and returns it an array of two ints [row, col]
@@ -34,24 +39,23 @@ class XOGame:
 	# The main game loop, plays until the game is won
 	def play_game(self):
 		game_won = False
-		x_move = random.randint(0, 1)
-		if (x_move):
-			print("X", end=" ")
+		user_move = random.randint(0, 1)
+		if (user_move):
+			print_typing("You move first!")
 		else:
-			print("O", end=" ")
-		print_typing("moves first.")
+			print_typing("Your opponent moves first.")
 		
 		while (not(game_won)):
-			if x_move:
+			if (user_move):
 				self.board.draw_board()
 				move = self.get_move()
 			else:
 				move = self.op_player.get_move(self.board)
-			if (x_move):
-				self.board.exec_move(move, "X")
+			if (user_move):
+				self.board.exec_move(move, self.player)
 			else:
-				self.board.exec_move(move, "O")
-			x_move = not(x_move)
+				self.board.exec_move(move, self.other)
+			user_move = not(user_move)
 			game_won, self.winner = self.eval.is_won(self.board)
 		
 		self.board.draw_board()

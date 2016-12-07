@@ -3,21 +3,41 @@ import xo_board_evaluator
 import random
 
 class XOPlayerSmart:
-	def __init__(self):
-		self.evaluator = xo_board_evaluator.XOBoardEvaluator();
+	# player is either "X" or "O" representing which character this 
+	# player is
+	def __init__(self, player):
+		self.evaluator = xo_board_evaluator.XOBoardEvaluator()
+		self.player = player
+		if (self.player == "X"):
+			self.op_player = "O"
+		else:
+			self.op_player = "X"
 		
 	def get_move(self, board):
 		moves = list(board.available_moves)
-		best_score = -10
-		best_move = moves[0]
-		for move in moves:
-			board.exec_move(move, "O")
-			score = -1 * self.get_board_score(board, "X", 1)
-			if (score > best_score or (score == best_score and random.randint(0, 1))):
-				best_score = score
-				best_move = move	
-			board.undo_move(move)
-		return best_move
+		# If this player gets the first move, the best move is in the middle
+		# because it has the most possibilities for winning the game
+		if (len(moves) >= 8 and moves.count([1, 1]) == 1):
+			return [1, 1]
+		scores = []
+		for i in range(len(moves)):
+			board.exec_move(moves[i], self.player)
+			score = -1 * self.get_board_score(board, self.op_player, 1)
+			scores.append(score)
+			board.undo_move(moves[i])
+		
+		best_score = -11
+		for i in range(len(scores)):
+			if (scores[i] > best_score):
+				best_score = scores[i]
+		
+		best_moves = []
+		for i in range(len(scores)):
+			if (scores[i] == best_score):
+				best_moves.append(moves[i])
+
+		choice = random.randint(0, len(best_moves) - 1)
+		return best_moves[choice]
 				
 	def get_board_score(self, board, player, depth):
 		is_won, winner = self.evaluator.is_won(board)
